@@ -19,5 +19,5 @@ Running
 -------
 
 ```
-bundle exec ruby leap.rb | /usr/bin/python -u emitter.py
+bundle exec ruby leap.rb | emitter.py
 ```
