@@ -13,3 +13,11 @@ Events protocol
 * accelerate-down, accelerate-up
 * brake-down, brake-up
 * fire-press, nitro-press
+
+
+Running
+-------
+
+```
+bundle exec ruby leap.rb | /usr/bin/python -u emitter.py
+```

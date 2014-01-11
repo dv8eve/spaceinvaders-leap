@@ -14,7 +14,8 @@ keys = {
   'nitro': 'n'
 }
 
-for line in sys.stdin:
+while True:
+  line = sys.stdin.readline()
   line = line.strip()
   pair = line.split("-")
   if len(pair) != 2:
