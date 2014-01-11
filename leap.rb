@@ -26,7 +26,9 @@ class LeapTest < LEAP::Motion::WS
     hands = frame.hands
     if hands.size == 2
       left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
+      offset = 100
       x, y, z = right_hand.palmPosition
+      x -= offset
       if x < -@side_threshold
         puts 'right-up' if @side_flag == 'right'
 
