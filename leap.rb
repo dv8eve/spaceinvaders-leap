@@ -33,84 +33,91 @@ class LeapTest < LEAP::Motion::WS
       # puts "Hand #{idx}. Palm position: #{hand.palmPosition}"
     # end
 
-
     hands = frame.hands
     if hands.size == 2
       left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
-      x, y, z = right_hand.palmPosition
-      x -= @offset
 
-      intensivity = x.abs
-      intensivity -= @side_threshold
-      if intensivity < 0
-        intensivity = 0
-      else
-        intensivity = (intensivity / @range_size).ceil
-        intensivity = [intensivity, @intensivity_ranges].min
-      end
-
-      if x < -@side_threshold
-        requested_state = 'left'
-      elsif x > @side_threshold
-        requested_state = 'right'
-      else
-        requested_state = 'mid'
-      end
-
-      if @side_state == requested_state
-        if requested_state != 'mid'
-          inc_counter
-        end
-      else
-        @counter = 0
-      end
-
-      if @counter < intensivity
-        requested_signal = requested_state
-      else
-        requested_signal = 'none'
-      end
-
-      # puts "x: #{x}\tintsv: #{intensivity}\treq: #{requested_state}, #{requested_signal}"
-
-      if requested_signal != @signal
-        puts "#{@signal}-up" if @signal != 'none'
-        puts "#{requested_signal}-down" if requested_signal != 'none'
-      end
-
-      @signal = requested_signal
-      @side_state = requested_state
-
-
-      x, y, z = left_hand.palmPosition
-      if z < -@vertical_threshold
-        puts 'brake-up' if @vertical_flag == 'brake'
-
-        if @vertical_flag != 'accelerate'
-          @vertical_flag = 'accelerate'
-          puts 'accelerate-down'
-        end
-      elsif z > @vertical_threshold
-        puts 'accelerate-up' if @vertical_flag == 'accelerate'
-
-        if @vertical_flag != 'brake'
-          @vertical_flag = 'brake'
-          puts 'brake-down'
-        end
-      else
-        puts 'accelerate-up' if @vertical_flag == 'accelerate'
-        puts 'brake-up' if @vertical_flag == 'brake'
-        @vertical_flag = 'none' if @vertical_flag != 'none'
-      end
-
-      if frame.pointables.size > @fire_threshold
-        puts 'fire-press' if @fire_flag == 'none'
-        @fire_flag = 'fire'
-      else
-        @fire_flag = 'none'
-      end
+      process_left_hand left_hand
+      process_right_hand right_hand, frame.pointables
     end
   end
+
+  def process_left_hand hand
+    x, y, z = hand.palmPosition
+    x -= @offset
+
+    intensivity = x.abs
+    intensivity -= @side_threshold
+    if intensivity < 0
+      intensivity = 0
+    else
+      intensivity = (intensivity / @range_size).ceil
+      intensivity = [intensivity, @intensivity_ranges].min
+    end
+
+    if x < -@side_threshold
+      requested_state = 'left'
+    elsif x > @side_threshold
+      requested_state = 'right'
+    else
+      requested_state = 'mid'
+    end
+
+    if @side_state == requested_state
+      if requested_state != 'mid'
+        inc_counter
+      end
+    else
+      @counter = 0
+    end
+
+    if @counter < intensivity
+      requested_signal = requested_state
+    else
+      requested_signal = 'none'
+    end
+
+    # puts "x: #{x}\tintsv: #{intensivity}\treq: #{requested_state}, #{requested_signal}"
+
+    if requested_signal != @signal
+      puts "#{@signal}-up" if @signal != 'none'
+      puts "#{requested_signal}-down" if requested_signal != 'none'
+    end
+
+    @signal = requested_signal
+    @side_state = requested_state
+  end
+
+  def process_right_hand hand, pointables
+    x, y, z = hand.palmPosition
+    if z < -@vertical_threshold
+      puts 'brake-up' if @vertical_flag == 'brake'
+
+      if @vertical_flag != 'accelerate'
+        @vertical_flag = 'accelerate'
+        puts 'accelerate-down'
+      end
+    elsif z > @vertical_threshold
+      puts 'accelerate-up' if @vertical_flag == 'accelerate'
+
+      if @vertical_flag != 'brake'
+        @vertical_flag = 'brake'
+        puts 'brake-down'
+      end
+    else
+      puts 'accelerate-up' if @vertical_flag == 'accelerate'
+      puts 'brake-up' if @vertical_flag == 'brake'
+      @vertical_flag = 'none' if @vertical_flag != 'none'
+    end
+
+    if pointables.size > @fire_threshold
+      puts 'fire-press' if @fire_flag == 'none'
+      @fire_flag = 'fire'
+    else
+      @fire_flag = 'none'
+    end
+  end
+
 
   def on_disconnect
     puts 'disconect'
