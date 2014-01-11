@@ -114,7 +114,7 @@ class LeapTest < LEAP::Motion::WS
     if pointables.size > @fire_threshold
       puts 'fire-press' if @fire_flag == 'none'
       @fire_flag = 'fire'
-    else
+    elsif pointables.size <= 1
       @fire_flag = 'none'
     end
   end
