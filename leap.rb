@@ -4,14 +4,23 @@ require 'pry'
 $stdout.sync = true
 
 class LeapTest < LEAP::Motion::WS
-  def initialize side_threshold = 50, vertical_threshold = 50
-    @side_flag = 'none'
+  def initialize side_threshold = 30, side_max = 100, offset = 120, intensivity_ranges = 10, vertical_threshold = 50, fire_threshold = 3
+    @side_state = 'mid'
+    @signal = 'none'
     @vertical_flag = 'none'
     @fire_flag = 'none'
     @side_threshold = side_threshold
     @vertical_threshold = vertical_threshold
-    @fire_threshold = 3
+    @fire_threshold = fire_threshold
+    @offset = offset
+    @intensivity_ranges = intensivity_ranges
+    @range_size = (side_max - side_threshold) / intensivity_ranges
+    @counter = 0
     puts 'initialize'
+  end
+
+  def inc_counter
+    @counter = (@counter + 1) % @intensivity_ranges
   end
 
   def on_connect
@@ -28,28 +37,50 @@ class LeapTest < LEAP::Motion::WS
     hands = frame.hands
     if hands.size == 2
       left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
-      offset = 100
       x, y, z = right_hand.palmPosition
-      x -= offset
+      x -= @offset
+
+      intensivity = x.abs
+      intensivity -= @side_threshold
+      if intensivity < 0
+        intensivity = 0
+      else
+        intensivity = (intensivity / @range_size).ceil
+        intensivity = [intensivity, @intensivity_ranges].min
+      end
+
       if x < -@side_threshold
-        puts 'right-up' if @side_flag == 'right'
-
-        if @side_flag != 'left'
-          @side_flag = 'left'
-          puts 'left-down'
-        end
+        requested_state = 'left'
       elsif x > @side_threshold
-        puts 'left-up' if @side_flag == 'left'
+        requested_state = 'right'
+      else
+        requested_state = 'mid'
+      end
 
-        if @side_flag != 'right'
-          @side_flag = 'right'
-          puts 'right-down'
+      if @side_state == requested_state
+        if requested_state != 'mid'
+          inc_counter
         end
       else
-        puts 'left-up' if @side_flag == 'left'
-        puts 'right-up' if @side_flag == 'right'
-        @side_flag = 'none' if @side_flag != 'none'
+        @counter = 0
       end
+
+      if @counter < intensivity
+        requested_signal = requested_state
+      else
+        requested_signal = 'none'
+      end
+
+      # puts "x: #{x}\tintsv: #{intensivity}\treq: #{requested_state}, #{requested_signal}"
+
+      if requested_signal != @signal
+        puts "#{@signal}-up" if @signal != 'none'
+        puts "#{requested_signal}-down" if requested_signal != 'none'
+      end
+
+      @signal = requested_signal
+      @side_state = requested_state
+
 
       x, y, z = left_hand.palmPosition
       if z < -@vertical_threshold
