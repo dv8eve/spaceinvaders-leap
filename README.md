@@ -1,5 +1,5 @@
 Mac dependencies
 ----------------
 
-* pip install appscript
-
+* `bundle install`
+* `bundle exec ruby leap.rb`
