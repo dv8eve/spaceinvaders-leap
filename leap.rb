@@ -7,8 +7,10 @@ class LeapTest < LEAP::Motion::WS
   def initialize side_threshold = 50, vertical_threshold = 50
     @side_flag = 'none'
     @vertical_flag = 'none'
+    @fire_flag = 'none'
     @side_threshold = side_threshold
     @vertical_threshold = vertical_threshold
+    @fire_threshold = 3
     puts 'initialize'
   end
 
@@ -70,7 +72,12 @@ class LeapTest < LEAP::Motion::WS
         @vertical_flag = 'none' if @vertical_flag != 'none'
       end
 
-
+      if frame.pointables.size > @fire_threshold
+        puts 'fire-press' if @fire_flag == 'none'
+        @fire_flag = 'fire'
+      else
+        @fire_flag = 'none'
+      end
     end
   end
 
