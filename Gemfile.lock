@@ -1,11 +1,18 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    coderay (1.1.0)
     eventmachine (1.0.3)
     json (1.8.1)
     leap-motion-ws (0.0.2)
       json
       websocket-eventmachine-client
+    method_source (0.8.2)
+    pry (0.9.12.4)
+      coderay (~> 1.0)
+      method_source (~> 0.8)
+      slop (~> 3.4)
+    slop (3.4.7)
     websocket (1.1.2)
     websocket-eventmachine-base (1.0.2)
       eventmachine (~> 1.0)
@@ -20,3 +27,4 @@ PLATFORMS
 
 DEPENDENCIES
   leap-motion-ws
+  pry
