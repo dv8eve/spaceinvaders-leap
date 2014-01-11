@@ -4,9 +4,11 @@ require 'pry'
 $stdout.sync = true
 
 class LeapTest < LEAP::Motion::WS
-  def initialize side_threshold = 50
+  def initialize side_threshold = 50, vertical_threshold = 50
     @side_flag = 'none'
+    @vertical_flag = 'none'
     @side_threshold = side_threshold
+    @vertical_threshold = vertical_threshold
     puts 'initialize'
   end
 
@@ -20,10 +22,11 @@ class LeapTest < LEAP::Motion::WS
       # puts "Hand #{idx}. Palm position: #{hand.palmPosition}"
     # end
 
+
     hands = frame.hands
-    if hands.any?
-      first_hand = hands.first
-      x, y, z = first_hand.palmPosition
+    if hands.size == 2
+      left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
+      x, y, z = right_hand.palmPosition
       if x < -@side_threshold
         puts 'right-up' if @side_flag == 'right'
 
@@ -43,6 +46,29 @@ class LeapTest < LEAP::Motion::WS
         puts 'right-up' if @side_flag == 'right'
         @side_flag = 'none' if @side_flag != 'none'
       end
+
+      x, y, z = left_hand.palmPosition
+      if z < -@vertical_threshold
+        puts 'brake-up' if @vertical_flag == 'brake'
+
+        if @vertical_flag != 'accelerate'
+          @vertical_flag = 'accelerate'
+          puts 'accelerate-down'
+        end
+      elsif z > @vertical_threshold
+        puts 'accelerate-up' if @vertical_flag == 'accelerate'
+
+        if @vertical_flag != 'brake'
+          @vertical_flag = 'brake'
+          puts 'brake-down'
+        end
+      else
+        puts 'accelerate-up' if @vertical_flag == 'accelerate'
+        puts 'brake-up' if @vertical_flag == 'brake'
+        @vertical_flag = 'none' if @vertical_flag != 'none'
+      end
+
+
     end
   end
 
@@ -52,6 +78,6 @@ class LeapTest < LEAP::Motion::WS
   end
 end
 
-leap = LeapTest.new
+leap = LeapTest.new(30)
 leap.start
 
