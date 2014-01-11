@@ -10,7 +10,7 @@ keys = {
   'right': 'd',
   'accelerate': 'w',
   'brake': 's',
-  'fire': 'space',
+  'fire': ' ',
   'nitro': 'n'
 }
 
