@@ -36,9 +36,10 @@ class LeapTest < LEAP::Motion::WS
     hands = frame.hands
     if hands.size == 2
       left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
+      left_hand_pointables = frame.pointables.select { |p| p.handId == left_hand.id }
 
       process_left_hand left_hand
-      process_right_hand right_hand, frame.pointables
+      process_right_hand right_hand, left_hand_pointables
     end
   end
 
