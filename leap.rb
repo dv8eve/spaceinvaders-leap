@@ -38,12 +38,12 @@ class LeapTest < LEAP::Motion::WS
       left_hand, right_hand = hands.sort_by { |h| h.palmPosition[0] }
       left_hand_pointables = frame.pointables.select { |p| p.handId == left_hand.id }
 
-      process_left_hand left_hand
-      process_right_hand right_hand, left_hand_pointables
+      process_left_hand left_hand, left_hand_pointables
+      process_right_hand right_hand
     end
   end
 
-  def process_left_hand hand
+  def process_right_hand hand
     x, y, z = hand.palmPosition
     x -= @offset
 
@@ -89,7 +89,7 @@ class LeapTest < LEAP::Motion::WS
     @side_state = requested_state
   end
 
-  def process_right_hand hand, pointables
+  def process_left_hand hand, pointables
     x, y, z = hand.palmPosition
     if z < -@vertical_threshold
       puts 'brake-up' if @vertical_flag == 'brake'
