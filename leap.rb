@@ -4,7 +4,7 @@ require 'pry'
 $stdout.sync = true
 
 class LeapTest < LEAP::Motion::WS
-  def initialize side_threshold = 30, side_max = 100, offset = 120, intensivity_ranges = 10, vertical_threshold = 50, fire_threshold = 3
+  def initialize side_threshold = 25, side_max = 100, offset = 120, intensivity_ranges = 20, vertical_threshold = 50, fire_threshold = 3
     @side_state = 'mid'
     @signal = 'none'
     @vertical_flag = 'none'
@@ -12,6 +12,7 @@ class LeapTest < LEAP::Motion::WS
     @side_threshold = side_threshold
     @vertical_threshold = vertical_threshold
     @fire_threshold = fire_threshold
+    @nitro_threshold = 100
     @offset = offset
     @intensivity_ranges = intensivity_ranges
     @range_size = (side_max - side_threshold) / intensivity_ranges
@@ -116,6 +117,10 @@ class LeapTest < LEAP::Motion::WS
       @fire_flag = 'fire'
     elsif pointables.size <= 1
       @fire_flag = 'none'
+    end
+
+    if z < -@nitro_threshold
+      puts 'nitro-press'
     end
   end
 
